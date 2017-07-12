@@ -16,7 +16,7 @@
     <attribute name="subtype" value="RECEIPT" />
 
     <!-- descriptive name of this capability -->
-    <provider>Sample Receipt Service</provider>>
+    <provider>Sample Receipt Service</provider>
 
 
 </capability>
