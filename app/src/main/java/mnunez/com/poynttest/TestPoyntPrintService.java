@@ -20,6 +20,7 @@ import co.poynt.api.model.Transaction;
 import co.poynt.os.model.AccessoryProvider;
 import co.poynt.os.model.AccessoryProviderFilter;
 import co.poynt.os.model.AccessoryType;
+import co.poynt.os.model.Intents;
 import co.poynt.os.model.PoyntError;
 import co.poynt.os.model.PrintedReceipt;
 import co.poynt.os.model.PrintedReceiptLine;
@@ -64,6 +65,7 @@ public class TestPoyntPrintService extends Service {
 
     private final IPoyntReceiptPrintingService.Stub mBinder = new IPoyntReceiptPrintingService.Stub() {
 
+        @Override
         public void printTransaction(String jobId, Transaction transaction, long
                 tipAmount, boolean signatureCollected, IPoyntReceiptPrintingServiceListener callback)
                 throws RemoteException {
@@ -71,33 +73,88 @@ public class TestPoyntPrintService extends Service {
             // your code
         }
 
+        @Override
         public void printTransactionReceipt(String jobId, String transactionId, long
                 tipAmount, IPoyntReceiptPrintingServiceListener callback) throws RemoteException {
             Log.d(TAG, "printTransactionReceipt ");
             // your code
         }
 
+        @Override
         public void printOrderReceipt(String jobId, String orderId,
                                       IPoyntReceiptPrintingServiceListener callback) throws RemoteException {
             Log.d(TAG, "printOrderReceipt ");
             // your code
         }
 
+        @Override
         // This method will be called from the Payment Fragment
         public void printReceipt(String jobId, PrintedReceipt receipt, final IPoyntReceiptPrintingServiceListener callback) throws RemoteException {
             Log.d(TAG, "printReceipt " + accessoryManagerService);
 
             // Add a custom line at the header just for testing purpose
-            List<PrintedReceiptLine> headerLines = receipt.getHeader();
-            PrintedReceiptLine line = new PrintedReceiptLine();
-            line.setText("This is an Accepta Test");
-            headerLines.add(0, line);
+//            List<PrintedReceiptLine> headerLines = receipt.getHeader();
+//            PrintedReceiptLine line = new PrintedReceiptLine();
+//            line.setText("This is an Accepta Test");
+//            headerLines.add(0, line);
+
+            List<PrintedReceiptLine> footerLines = receipt.getFooter();
+            if (footerLines != null) {
+                PrintedReceiptLine line = new PrintedReceiptLine();
+                line.setText("This is an Accepta Test");
+                footerLines.add(0, line);
+            }
+
 
             // If you want to print to the built-in printer you will need to construct
             // a bitmap of your custom receipt. In this case I am just printing a poynt logo
             try {
-                poyntPrinterService.printJob(UUID.randomUUID().toString(),
-                        BitmapFactory.decodeResource(getResources(), R.drawable.poynt_logo_300dpi_50x50),
+//                poyntPrinterService.printJob(UUID.randomUUID().toString(),
+//                        BitmapFactory.decodeResource(getResources(), R.drawable.poynt_logo_300dpi_50x50),
+//                        new IPoyntPrinterServiceListener.Stub() {
+//                            @Override
+//                            public void onPrintResponse(PrinterStatus printerStatus, String s) throws RemoteException {
+//                                switch (printerStatus.getCode()) {
+//                                    case PRINTER_CONNECTED:
+//                                        Log.d(TAG, "onPrintResponse: PRINTER_CONNECTED");
+//                                        break;
+//                                    case PRINTER_DISCONNECTED:
+//                                        Log.d(TAG, "onPrintResponse: PRINTER_DISCONNECTED");
+//                                        break;
+//                                    case PRINTER_UNAVAILABLE:
+//                                        Log.d(TAG, "onPrintResponse: PRINTER_UNAVAILABLE");
+//                                        // notify the callback function
+//                                        callback.printFailed(null);
+//                                        break;
+//                                    case PRINTER_JOB_PRINTED:
+//                                        Log.d(TAG, "onPrintResponse: PRINTER_JOB_PRINTED");
+//                                        break;
+//                                    case PRINTER_JOB_FAILED:
+//                                        Log.d(TAG, "onPrintResponse: PRINTER_JOB_FAILED");
+//                                        callback.printFailed(null);
+//                                        break;
+//                                    case PRINTER_JOB_QUEUED:
+//                                        Log.d(TAG, "onPrintResponse: PRINTER_JOB_QUEUED");
+//                                        callback.printQueued();
+//                                        break;
+//                                    case PRINTER_ERROR_OUT_OF_PAPER:
+//                                        Log.d(TAG, "onPrintResponse: PRINTER_ERROR_OUT_OF_PAPER");
+//                                        callback.printFailed(null);
+//                                        break;
+//                                    case PRINTER_ERROR_OTHER:
+//                                        Log.d(TAG, "onPrintResponse: PRINTER_ERROR_OTHER");
+//                                        callback.printFailed(null);
+//                                        break;
+//                                    default:
+//                                        Log.d(TAG, "onPrintResponse: This should not happen");
+//                                        callback.printFailed(null);
+//                                        break;
+//                                }
+//
+//                            }
+//                        });
+                poyntPrinterService.printReceiptJob(UUID.randomUUID().toString(),
+                        receipt,
                         new IPoyntPrinterServiceListener.Stub() {
                             @Override
                             public void onPrintResponse(PrinterStatus printerStatus, String s) throws RemoteException {
@@ -146,6 +203,7 @@ public class TestPoyntPrintService extends Service {
             }
         }
 
+        @Override
         public void printBitmap(String jobId, Bitmap bitmap, IPoyntReceiptPrintingServiceListener callback) throws RemoteException {
             Log.d(TAG, "printBitmap ");
         }
@@ -167,17 +225,17 @@ public class TestPoyntPrintService extends Service {
 
         @Override
         public void printTransactionReceiptWithOptions(String s, String s1, long l, ReceiptOptions receiptOptions, IPoyntReceiptPrintingServiceListener iPoyntReceiptPrintingServiceListener) throws RemoteException {
-
+            Log.d(TAG, "printTransactionReceiptWithOptions ");
         }
 
         @Override
         public void printStayReceiptWithOptions(String s, String s1, ReceiptOptions receiptOptions, IPoyntReceiptPrintingServiceListener iPoyntReceiptPrintingServiceListener) throws RemoteException {
-
+            Log.d(TAG, "printStayReceiptWithOptions ");
         }
 
         @Override
         public void printBalanceInquiryWithOptions(String s, BalanceInquiry balanceInquiry, ReceiptOptions receiptOptions, IPoyntReceiptPrintingServiceListener iPoyntReceiptPrintingServiceListener) throws RemoteException {
-
+            Log.d(TAG, "printBalanceInquiryWithOptions ");
         }
 
     };
@@ -230,8 +288,6 @@ public class TestPoyntPrintService extends Service {
                         // select build-in Poynt printer and make sure it is not disabled
                         if (printer.isConnected() &&
                                 "co.poynt.services.PoyntPrinterService".equals(printer.getClassName())) {
-                            Intent intent = new Intent();
-                            intent.setClassName(printer.getPackageName(), printer.getClassName());
 
                             poyntPrinterConnection = new ServiceConnection() {
                                 @Override
@@ -245,7 +301,12 @@ public class TestPoyntPrintService extends Service {
                                 }
                             };
 
-                            bindService(intent,
+//                            Intent intent = new Intent();
+//                            intent.setAction(String.valueOf(AccessoryType.PRINTER));
+//                            intent.setClassName(printer.getPackageName(), printer.getClassName());
+//                            bindService(intent,
+//                                    poyntPrinterConnection, Context.BIND_AUTO_CREATE);
+                            bindService(Intents.getComponentIntent(Intents.COMPONENT_POYNT_RECEIPT_PRINTING_SERVICE),
                                     poyntPrinterConnection, Context.BIND_AUTO_CREATE);
 
                             break;
